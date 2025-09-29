@@ -4,11 +4,11 @@
     "slug": "Pointage",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logony.png",
+    "icon": "./assets/logo.jpeg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/logony.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,14 +17,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logony.png",
+        "foregroundImage": "./assets/logo.jpeg",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.falitiana123.Pointage"
     },
     "web": {
-      "favicon": "./assets/logony.png"
+      "favicon": "./assets/logo.jpeg"
     },
     "extra": {
       "eas": {
