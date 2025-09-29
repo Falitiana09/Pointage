@@ -45,3 +45,8 @@ yarn-error.*
 # Fampirimana build tsy ilaina
 /build
 /temp
+node_modules/
+.expo/
+build/
+dist/
+.cache/
