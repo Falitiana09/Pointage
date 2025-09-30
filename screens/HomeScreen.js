@@ -4,7 +4,6 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 import { useTheme } from '../contexts/ThemeContext';
 
-import logo from '../assets/images/logo.jpeg';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
