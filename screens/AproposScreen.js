@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Linking } from 'react-native';
+// Tsy maintsy ampidirina ny 'Modal' eto!
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Linking, Modal } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import logo from '../assets/images/logony.png';
+import logo from '../assets/images/logo.png';
 
 const AideScreen = () => {
+  // Ampidiro ity state ity hifehezana ny fiparitahan'ny sary
+  const [isLogoModalVisible, setIsLogoModalVisible] = useState(false);
+
   const [showFullText, setShowFullText] = useState({
     registration: false,
     list: false,
@@ -66,9 +70,33 @@ Souviens-toi qu’il n’est pas encore possible de modifier le mot de passe. En
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.colors.background }]}>
+      
+      {/* Modal ho an'ny Sary Miparitaka */}
+      <Modal
+        visible={isLogoModalVisible}
+        transparent={true}
+        onRequestClose={() => setIsLogoModalVisible(false)} // Mila an'io ho an'ny Android
+      >
+        <TouchableOpacity 
+          style={styles.fullScreenContainer} 
+          onPress={() => setIsLogoModalVisible(false)} // Rehefa kitihina dia mikatona
+          activeOpacity={1}
+        >
+          {/* Sary lehibe miparitaka ao anatin'ny modal */}
+          <Image 
+            source={logo} 
+            style={styles.fullScreenLogo} 
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+      </Modal>
+
       {/* Header Section */}
       <View style={styles.header}>
-        <Image source={logo} style={styles.logo} />
+        {/* Fonosina amin'ny TouchableOpacity hifehezana ny Modal */}
+        <TouchableOpacity onPress={() => setIsLogoModalVisible(true)}>
+          <Image source={logo} style={styles.logo} />
+        </TouchableOpacity>
         <Text style={[styles.title, { color: theme.colors.text }]}>Centre d'aide</Text>
       </View>
 
@@ -246,6 +274,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  // Styles vaovao ho an'ny Modal sy Sary Miparitaka
+  fullScreenContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)', // Loko mainty mangarahara
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullScreenLogo: {
+    width: '90%', 
+    height: '90%', 
   },
 });
 
