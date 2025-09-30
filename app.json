@@ -4,11 +4,11 @@
     "slug": "Pointage",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/logo.jpeg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/logo.png",
+      "image": "./assets/images/logo.jpeg",
       "resizeMode": "contain",
       "backgroundColor": "#f5f5f5"
     },
@@ -16,16 +16,16 @@
       "supportsTablet": true
     },
     "android": {
-      "icon": "./assets/images/logo.png",
+      "icon": "./assets/images/logo.jpeg",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.png",
+        "foregroundImage": "./assets/images/logo.jpeg",
         "backgroundColor": "#f5f5f5"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.falitiana123.Pointage"
     },
     "web": {
-      "favicon": "./assets/images/logo.png"
+      "favicon": "./assets/images/logo.jpeg"
     },
     "extra": {
       "eas": {

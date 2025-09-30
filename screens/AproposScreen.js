@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // Tsy maintsy ampidirina ny 'Modal' eto!
 import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Linking, Modal } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
-import logo from '../assets/images/logo.png';
+import logo from '../assets/images/logo.jpeg';
 
 const AideScreen = () => {
   // Ampidiro ity state ity hifehezana ny fiparitahan'ny sary
