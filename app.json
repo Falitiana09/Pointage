@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Pointage",
+    "slug": "Pointage",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/IMG_4214.JPG",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/IMG_4214.JPG",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/IMG_4214.JPG",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/images/IMG_4214.JPG"
+    }
+  }
+}
