@@ -4,11 +4,11 @@
     "slug": "Pointage",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/IMG_4214.JPG",
+    "icon": "./assets/images/IMG_4214.png",  
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/IMG_4214.JPG",
+      "image": "./assets/images/IMG_4214.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -19,13 +19,13 @@
     "android": {
       "package": "com.nyhavana.pointage",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/IMG_4214.JPG",
+        "foregroundImage": "./assets/images/IMG_4214.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/images/IMG_4214.JPG"
+      "favicon": "./assets/images/IMG_4214.png"
     },
     "extra": {
       "eas": {
