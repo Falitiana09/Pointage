@@ -8,22 +8,29 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/IMG_4214.JPG",
+      "image": "./assets/images/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nyhavana.pointage"
     },
     "android": {
+      "package": "com.nyhavana.pointage",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/IMG_4214.JPG",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/images/IMG_4214.JPG"
+      "favicon": "./assets/images/icon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "23659013-976d-47de-afd3-60fa823566b5"
+      }
     }
   }
 }

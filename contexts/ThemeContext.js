@@ -1,19 +1,26 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Appearance } from 'react-native';
 
-const ThemeContext = createContext();
+const ThemeContext = createContext({
+  theme: {},
+  toggleTheme: () => {},
+  toggleSound: () => {},
+  toggleVibration: () => {},
+  soundEnabled: true,      // ⚠️ ajouté ici
+  vibrationEnabled: true,  // ⚠️ ajouté ici
+});
 
-// Famaritana ny thèmes roa
+// ------------------- THÈMES -------------------
 const lightTheme = {
   colors: {
     header: '#fff',
     background: '#f5f5f5',
     text: '#000',
-    text_rgb: '0, 0, 0', // RGB for black
+    text_rgb: '0, 0, 0',
     border: '#ddd',
     placeholder: '#999',
-    primary: '#007bff', // Loko manga
-    primary_rgb: '0, 123, 255', // RGB for #007bff
+    primary: '#007bff',
+    primary_rgb: '0, 123, 255',
     card: '#fff',
     textSecondary: '#666',
     shadow: '#000',
@@ -35,11 +42,11 @@ const darkTheme = {
     header: '#333',
     background: '#121212',
     text: '#fff',
-    text_rgb: '255, 255, 255', // RGB for white
+    text_rgb: '255, 255, 255',
     border: '#555',
     placeholder: '#888',
     primary: '#4CAF50',
-    primary_rgb: '76, 175, 80', // RGB for #4CAF50
+    primary_rgb: '76, 175, 80',
     card: '#1e1e1e',
     textSecondary: '#ccc',
     shadow: '#fff',
@@ -56,47 +63,44 @@ const darkTheme = {
   vibrationEnabled: true,
 };
 
+// ------------------- PROVIDER -------------------
 export const ThemeProvider = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState(Appearance.getColorScheme() === 'dark' ? darkTheme : lightTheme);
+  const [currentTheme, setCurrentTheme] = useState(
+    Appearance.getColorScheme() === 'dark' ? darkTheme : lightTheme
+  );
 
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      if (colorScheme === 'dark') {
-        setCurrentTheme(darkTheme);
-      } else {
-        setCurrentTheme(lightTheme);
-      }
+      setCurrentTheme(colorScheme === 'dark' ? darkTheme : lightTheme);
     });
     return () => subscription.remove();
   }, []);
 
   const toggleTheme = (mode) => {
-    if (mode === 'dark') {
-      setCurrentTheme(darkTheme);
-    } else {
-      setCurrentTheme(lightTheme);
-    }
+    setCurrentTheme(mode === 'dark' ? darkTheme : lightTheme);
   };
 
   const toggleSound = () => {
-    setCurrentTheme(prevTheme => ({
-      ...prevTheme,
-      soundEnabled: !prevTheme.soundEnabled,
-    }));
+    setCurrentTheme(prev => ({ ...prev, soundEnabled: !prev.soundEnabled }));
   };
 
   const toggleVibration = () => {
-    setCurrentTheme(prevTheme => ({
-      ...prevTheme,
-      vibrationEnabled: !prevTheme.vibrationEnabled,
-    }));
+    setCurrentTheme(prev => ({ ...prev, vibrationEnabled: !prev.vibrationEnabled }));
   };
 
   return (
-    <ThemeContext.Provider value={{ theme: currentTheme, toggleTheme, toggleSound, toggleVibration }}>
+    <ThemeContext.Provider value={{ 
+      theme: currentTheme, 
+      toggleTheme, 
+      toggleSound, 
+      toggleVibration,
+      soundEnabled: currentTheme.soundEnabled,      // ✅ ajouté
+      vibrationEnabled: currentTheme.vibrationEnabled, // ✅ ajouté
+    }}>
       {children}
     </ThemeContext.Provider>
   );
 };
 
+// ------------------- HOOK -------------------
 export const useTheme = () => useContext(ThemeContext);

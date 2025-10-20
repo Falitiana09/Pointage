@@ -30,52 +30,52 @@ export default function App() {
           <Stack.Screen
             name="Enregistrement"
             component={EnregistrementScreen}
-            options={{ title: '' }}
+            options={{ title: 'Inscription' }}
           />
           <Stack.Screen
             name="Listes des employés"
             component={ListesScreen}
-            options={{ title: '' }}
+            options={{ title: 'Toutes les employes' }}
           />
           <Stack.Screen
             name="Details"
             component={DetailsScreen}
-            options={{ title: '' }}
+            options={{ title: 'Profile d\'employe' }}
           />
           <Stack.Screen
             name="Modification"
             component={ModificationScreen}
-            options={{ title: '' }}
+            options={{ title: 'Mettre à jour' }}
           />
           <Stack.Screen
             name="Pointage"
             component={PointageScreen}
-            options={{ title: '' }}
+            options={{ title: 'connexion' }}
           />
           <Stack.Screen
             name="Dashboard"
             component={DashboardScreen}
-            options={{ title: '' }}
+            options={{ title: 'Mon compte' }}
           />
           <Stack.Screen
             name="Historique"
             component={HistoriqueScreen}
-            options={{ title: '' }}
+            options={{ title: 'Historique et status' }}
           />
           <Stack.Screen
             name="Histogramme"
             component={HistogrammeScreen}
-            options={{ title: '' }}
+            options={{ title: 'Statistique par semaine' }}
           />
           <Stack.Screen
             name="Apropos" 
             component={AproposScreen}
-            options={{ title: '' }}
+            options={{ title: 'Aide' }}
           />
           <Stack.Screen
             name="Parametres" 
             component={ParametresScreen}
-            options={{ title: '' }}
+            options={{ title: 'Paramètres' }}
           />
         </Stack.Navigator>
       </NavigationContainer>

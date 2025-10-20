@@ -1,0 +1,19 @@
+CREATE TABLE utilisateur (
+utilisateur_id INT NOT NULL AUTO_INCREMENT,
+matricule VARCHAR(50) UNIQUE NOT NULL,
+nom VARCHAR(100) NOT NULL,
+prenom VARCHAR(100) NOT NULL,
+adresse_mail VARCHAR(255) UNIQUE,
+mot_de_passe_hash VARCHAR(255),
+numero_tel VARCHAR(20),
+sexe VARCHAR(10),
+date_naissance DATE,
+poste VARCHAR(100),
+adresse VARCHAR(255),
+ville VARCHAR(100),
+date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+date_mise_a_jour TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+PRIMARY KEY (utilisateur_id)
+
+);

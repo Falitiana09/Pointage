@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  TextInput, 
-  TouchableOpacity, 
-  Alert, 
-  ScrollView, 
-  ActivityIndicator, 
-  Image, 
-  Platform, // NAMPIDIRINA
-  KeyboardAvoidingView // NAMPIDIRINA
+  StyleSheet, Text, View, TextInput, TouchableOpacity, 
+  ScrollView, ActivityIndicator, Image, Platform, KeyboardAvoidingView 
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../contexts/ThemeContext';
+import { Audio } from 'expo-av';
 
 const SERVER_URL = 'https://app-d640882c-5f6c-40be-bdce-71d739b28d12.cleverapps.io';
 
@@ -23,7 +15,7 @@ const ModificationScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { employee } = route.params;
-  const { theme } = useTheme();
+  const { theme, soundEnabled } = useTheme(); // 🔹 récupérer le son depuis le context
 
   const [nom, setNom] = useState(employee.nom);
   const [prenom, setPrenom] = useState(employee.prenom);
@@ -37,40 +29,47 @@ const ModificationScreen = () => {
 
   useEffect(() => {
     (async () => {
-      // Demande la permission d'accéder à la galerie
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          // Nampiasa console.error fa tsy Alert satria Alert dia mety hanakana ny flow.
-          console.error('Permission requise: L\'application a besoin d\'un accès à votre galerie.');
-        }
+        if (status !== 'granted') console.error('Permission requise: accès galerie refusé.');
       }
     })();
   }, []);
-  
-  // Fanovana ny Alert ho console.error
-  const handleAlert = (titre, message) => {
-    // Mampiasa console.log mba tsy hanakana ny UI
-    console.log(`[ALERTE - ${titre}] ${message}`);
+
+  // 🎵 Jouer son seulement si activé
+  const playSound = async (soundFile) => {
+    if (!soundEnabled) return; // si désactivé -> rien
+    try {
+      const { sound } = await Audio.Sound.createAsync(soundFile);
+      await sound.playAsync();
+      setTimeout(() => sound.unloadAsync(), 1500);
+    } catch (error) {
+      console.warn('Erreur son:', error);
+    }
   };
 
+  const playClick = () => playSound(require('../assets/sounds/click.mp3'));
+  const playSuccess = () => playSound(require('../assets/sounds/success.mp3'));
+  const playError = () => playSound(require('../assets/sounds/error.mp3'));
 
+  // 📷 Choisir photo
   const handleChoosePhoto = async () => {
-    // Ouvre la galerie
+    await playClick();
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-
     if (!result.canceled) {
       setPhoto(result.assets[0]);
       setCurrentPhotoUrl(result.assets[0].uri);
     }
   };
 
+  // 🔄 Mettre à jour l'employé
   const handleUpdate = async () => {
+    await playClick();
     setLoading(true);
     const formData = new FormData();
     formData.append('nom', nom);
@@ -81,51 +80,41 @@ const ModificationScreen = () => {
     formData.append('mail', mail);
 
     if (photo) {
-      // Prépare le format de l'image pour FormData
       const uriParts = photo.uri.split('.');
       const fileType = uriParts[uriParts.length - 1];
       const fileName = photo.fileName || `photo.${fileType}`;
-
-      formData.append('photo', {
-        // Tsy maintsy mampiasa 'file://' na 'content://' ny uri anaty FormData fa tsy zavatra hafa.
-        uri: photo.uri,
-        name: fileName,
-        type: photo.type || `image/${fileType}`,
-      });
+      formData.append('photo', { uri: photo.uri, name: fileName, type: photo.type || `image/${fileType}` });
     }
 
     try {
       const response = await fetch(`${SERVER_URL}/api/employees/${employee.id}`, {
         method: 'PUT',
-        headers: {
-          // Tsy tokony asiana 'Content-Type': 'multipart/form-data' raha mampiasa FormData, fa ny fetch no mametraka azy io.
-          // Tsy nampidirina ny Content-Type ao anatin'ny headers mba hialana amin'ny olana amin'ny RN.
-        },
         body: formData,
       });
 
       const data = await response.json();
-      
-      // Fanovana Alert ho console.log
-      handleAlert('Notification', data.message);
 
       if (response.ok) {
+        await playSuccess();
         navigation.goBack();
       } else {
-         // Fanovana Alert ho console.log
-        handleAlert('Erreur', data.message || 'Echec de la mise à jour.');
+        await playError();
+        console.log('[Erreur]', data.message || 'Echec de la mise à jour.');
       }
     } catch (error) {
-      // Fanovana Alert ho console.log
-      handleAlert('Erreur', 'Impossible de se connecter au serveur. Vérifiez votre connexion.');
-      console.error(error);
+      await playError();
+      console.error('[Erreur]', 'Impossible de se connecter au serveur.', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleInputChange = async (setter, value) => {
+    setter(value);
+    await playClick();
+  };
+
   return (
-    // FAMPIDIRANA KeyboardAvoidingView
     <KeyboardAvoidingView 
       style={styles.mainContainer}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
@@ -133,12 +122,11 @@ const ModificationScreen = () => {
     >
       <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.colors.background }]}>
         <Text style={[styles.titre, { color: theme.colors.primary }]}>Modification de l'employé</Text>
+
         <View style={[styles.card, { backgroundColor: theme.colors.card, shadowColor: theme.colors.shadow }]}>
-          
           <View style={styles.profileImageContainer}>
             <Image
               source={currentPhotoUrl ? { uri: currentPhotoUrl } : require('../assets/images/user.png')}
-              // Fiverenana amin'ny style profileImageDefault raha toa ka tsy misy sary URL tena izy.
               style={currentPhotoUrl && currentPhotoUrl.startsWith('http') ? styles.profileImage : styles.profileImageDefault}
               resizeMode={currentPhotoUrl && currentPhotoUrl.startsWith('http') ? 'cover' : 'contain'}
             />
@@ -147,90 +135,34 @@ const ModificationScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Nampiana 'autoCapitalize' sy 'autoCorrect' ho an'ny fampiasa tsara kokoa */}
-          <View style={[styles.inputContainer, { backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border }]}>
-            <Icon name="person" size={20} color={theme.colors.textSecondary} style={styles.icon} />
-            <TextInput
-              style={[styles.input, { color: theme.colors.text }]}
-              placeholder="Nom"
-              value={nom}
-              onChangeText={setNom}
-              placeholderTextColor={theme.colors.placeholder}
-              autoCapitalize="words"
-              autoCorrect={false}
-            />
-          </View>
-          <View style={[styles.inputContainer, { backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border }]}>
-            <Icon name="person-outline" size={20} color={theme.colors.textSecondary} style={styles.icon} />
-            <TextInput
-              style={[styles.input, { color: theme.colors.text }]}
-              placeholder="Prénom"
-              value={prenom}
-              onChangeText={setPrenom}
-              placeholderTextColor={theme.colors.placeholder}
-              autoCapitalize="words"
-            />
-          </View>
-          <View style={[styles.inputContainer, { backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border }]}>
-            <Icon name="badge" size={20} color={theme.colors.textSecondary} style={styles.icon} />
-            <TextInput
-              style={[styles.input, { color: theme.colors.text }]}
-              placeholder="Matricule"
-              value={matricule}
-              onChangeText={setMatricule}
-              placeholderTextColor={theme.colors.placeholder}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-          <View style={[styles.inputContainer, { backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border }]}>
-            <Icon name="calendar-today" size={20} color={theme.colors.textSecondary} style={styles.icon} />
-            <TextInput
-              style={[styles.input, { color: theme.colors.text }]}
-              placeholder="Date de naissance (AAAA-MM-DD)"
-              value={dateDeNaissance}
-              onChangeText={setDateDeNaissance}
-              placeholderTextColor={theme.colors.placeholder}
-              keyboardType="numbers-and-punctuation"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-          <View style={[styles.inputContainer, { backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border }]}>
-            <Icon name="phone" size={20} color={theme.colors.textSecondary} style={styles.icon} />
-            <TextInput
-              style={[styles.input, { color: theme.colors.text }]}
-              placeholder="Téléphone"
-              keyboardType="phone-pad"
-              value={tel}
-              onChangeText={setTel}
-              placeholderTextColor={theme.colors.placeholder}
-            />
-          </View>
-          <View style={[styles.inputContainer, { backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border }]}>
-            <Icon name="email" size={20} color={theme.colors.textSecondary} style={styles.icon} />
-            <TextInput
-              style={[styles.input, { color: theme.colors.text }]}
-              placeholder="E-mail"
-              keyboardType="email-address"
-              value={mail}
-              onChangeText={setMail}
-              placeholderTextColor={theme.colors.placeholder}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
+          {[{val: nom, set: setNom, placeholder: "Nom", icon: "person"},
+            {val: prenom, set: setPrenom, placeholder: "Prénom", icon: "person-outline"},
+            {val: matricule, set: setMatricule, placeholder: "Matricule", icon: "badge"},
+            {val: dateDeNaissance, set: setDateDeNaissance, placeholder: "Date de naissance (AAAA-MM-DD)", icon: "calendar-today", keyboardType: "numbers-and-punctuation"},
+            {val: tel, set: setTel, placeholder: "Téléphone", icon: "phone", keyboardType: "phone-pad"},
+            {val: mail, set: setMail, placeholder: "E-mail", icon: "email", keyboardType: "email-address"}
+          ].map((item, index) => (
+            <View key={index} style={[styles.inputContainer, { backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border }]}>
+              <Icon name={item.icon} size={20} color={theme.colors.textSecondary} style={styles.icon} />
+              <TextInput
+                style={[styles.input, { color: theme.colors.text }]}
+                placeholder={item.placeholder}
+                value={item.val}
+                onChangeText={(text) => handleInputChange(item.set, text)}
+                placeholderTextColor={theme.colors.placeholder}
+                keyboardType={item.keyboardType || "default"}
+                autoCapitalize="words"
+                autoCorrect={false}
+              />
+            </View>
+          ))}
 
           <TouchableOpacity 
             style={[styles.button, { backgroundColor: theme.colors.primary }]} 
             onPress={handleUpdate}
             disabled={loading}
           >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Mettre à jour</Text>
-            )}
+            {loading ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.buttonText}>Mettre à jour</Text>}
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -239,93 +171,19 @@ const ModificationScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1, // Tsy maintsy manana flex: 1 ny KeyboardAvoidingView
-  },
-  container: {
-    flexGrow: 1,
-    padding: 10,
-    alignItems: 'center',
-  },
-  card: {
-    width: '100%',
-    borderRadius: 10,
-    padding: 20,
-    elevation: 3,
-    marginBottom: 30,
-  },
-  titre: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  profileImageContainer: {
-    width: 110,
-    height: 110,
-    borderRadius: 60,
-    alignSelf: 'center',
-    marginBottom: 20,
-    overflow: 'hidden',
-    backgroundColor: '#eee',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileImage: {
-    // Navadika ho 100% ny sary mba hifanaraka amin'ny container.
-    width: '100%', 
-    height: '100%', 
-    borderRadius: 60, 
-    borderWidth: 1,
-    borderColor: '#00bfffff',
-  },
-  profileImageDefault: {
-    width: 80,
-    height: 80,
-    tintColor: '#999',
-    // Nesorina ireo styles tsy ilaina
-    marginBottom: 0,
-    marginTop: 0, 
-  },
-  photoButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: 20,
-    padding: 8,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-    borderWidth: 1,
-    borderRadius: 30,
-    paddingHorizontal: 10,
-    width: '100%',
-  },
-  icon: {
-    marginRight: 10
-  },
-  input: {
-    flex: 1,
-    height: 55,
-    width: '100%',
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 20,
-    borderRadius: 30,
-    elevation: 3,
-    marginTop: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  mainContainer: { flex: 1 },
+  container: { flexGrow: 1, padding: 10, alignItems: 'center' },
+  card: { width: '100%', borderRadius: 10, padding: 20, elevation: 3, marginBottom: 30 },
+  titre: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
+  profileImageContainer: { width: 110, height: 110, borderRadius: 60, alignSelf: 'center', marginBottom: 20, overflow: 'hidden', backgroundColor: '#eee', justifyContent: 'center', alignItems: 'center' },
+  profileImage: { width: '100%', height: '100%', borderRadius: 60, borderWidth: 1, borderColor: '#00bfffff' },
+  profileImageDefault: { width: 80, height: 80, tintColor: '#999' },
+  photoButton: { position: 'absolute', bottom: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 20, padding: 8 },
+  inputContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 15, borderWidth: 1, borderRadius: 30, paddingHorizontal: 10, width: '100%' },
+  icon: { marginRight: 10 },
+  input: { flex: 1, height: 55 },
+  button: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 20, borderRadius: 30, elevation: 3, marginTop: 10 },
+  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 });
 
 export default ModificationScreen;

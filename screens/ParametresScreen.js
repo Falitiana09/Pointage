@@ -1,42 +1,50 @@
-// Parametres.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../contexts/ThemeContext'; // Ampiana mba hampiasa ny contexte
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function ParametresScreen() {
-  const navigation = useNavigation();
-  const { theme, toggleTheme, toggleSound, toggleVibration } = useTheme();
+  const { theme, toggleTheme, toggleSound } = useTheme(); 
+
+  // Déterminer le mode actuel selon theme.colors.background
+  const currentMode = theme.colors.background === '#121212' ? 'dark' : 'light';
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView contentContainerStyle={styles.main}>
-        {/* Fizarana momba ny Thème */}
+        {/* Thème */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Thème</Text>
           <View style={styles.optionsContainer}>
-            <TouchableOpacity style={styles.themeButton} onPress={() => toggleTheme('light')}>
+            <TouchableOpacity
+              style={[styles.themeButton, currentMode === 'light' && styles.activeThemeButton]}
+              onPress={() => toggleTheme('light')}
+            >
               <Icon name="light-mode" size={24} color="#000" />
               <Text style={styles.themeButtonText}>Clair</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.themeButton} onPress={() => toggleTheme('dark')}>
+
+            <TouchableOpacity
+              style={[styles.themeButton, currentMode === 'dark' && styles.activeThemeButton]}
+              onPress={() => toggleTheme('dark')}
+            >
               <Icon name="dark-mode" size={24} color="#fff" />
               <Text style={[styles.themeButtonText, { color: '#fff' }]}>Sombre</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Fizarana momba ny feo sy vibration */}
+        {/* Son */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Sons & Vibrations</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Son</Text>
           <View style={styles.optionRow}>
-            <Text style={[styles.optionLabel, { color: theme.colors.text }]}>Activer les sons</Text>
-            <Switch onValueChange={toggleSound} value={theme.soundEnabled} />
-          </View>
-          <View style={styles.optionRow}>
-            <Text style={[styles.optionLabel, { color: theme.colors.text }]}>Activer les vibrations</Text>
-            <Switch onValueChange={toggleVibration} value={theme.vibrationEnabled} />
+            <Text style={[styles.optionLabel, { color: theme.colors.text }]}>Activer le son</Text>
+            <Switch
+              value={theme.soundEnabled} // ← utilisation correcte
+              onValueChange={toggleSound} // bascule le son
+              trackColor={{ false: '#767577', true: theme.colors.primary }}
+              thumbColor={theme.soundEnabled ? '#fff' : '#f4f3f4'}
+            />
           </View>
         </View>
       </ScrollView>
@@ -45,38 +53,11 @@ export default function ParametresScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  main: {
-    padding: 20,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  optionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-  },
+  container: { flex: 1 },
+  main: { padding: 20 },
+  section: { marginBottom: 20 },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
+  optionsContainer: { flexDirection: 'row', justifyContent: 'space-around', width: '100%' },
   themeButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -84,9 +65,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#eee',
   },
-  themeButtonText: {
-    marginLeft: 5,
+  activeThemeButton: {
+    borderWidth: 2,
+    borderColor: '#4CAF50',
   },
+  themeButtonText: { marginLeft: 5, fontWeight: 'bold' },
   optionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -95,7 +78,5 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  optionLabel: {
-    fontSize: 16,
-  },
+  optionLabel: { fontSize: 16 },
 });

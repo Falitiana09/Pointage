@@ -1,58 +1,81 @@
-// Fichier: LoginScreen.js
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useTheme } from '../contexts/ThemeContext';
+import { Audio } from 'expo-av';
+
+const SERVER_URL = 'https://app-d640882c-5f6c-40be-bdce-71d739b28d12.cleverapps.io'; 
 
 const LoginScreen = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { theme, soundEnabled } = useTheme();
   const [numTel, setNumTel] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
- const SERVER_URL = 'https://app-d640882c-5f6c-40be-bdce-71d739b28d12.cleverapps.io'; 
+  // 🎵 Fonction pour jouer un son uniquement si soundEnabled = true
+  const playSound = async (type = 'click') => {
+    if (!soundEnabled) return; // 🔹 Ne joue pas si son désactivé
+    try {
+      let soundFile;
+      switch(type){
+        case 'success': soundFile = require('../assets/sounds/success.mp3'); break;
+        case 'error': soundFile = require('../assets/sounds/error.mp3'); break;
+        default: soundFile = require('../assets/sounds/click.mp3'); break;
+      }
+      const { sound } = await Audio.Sound.createAsync(soundFile);
+      await sound.playAsync();
+      setTimeout(() => sound.unloadAsync(), 1000);
+    } catch (error) {
+      console.warn('Erreur son:', error);
+    }
+  };
 
   const handleLogin = async () => {
+    await playSound('click'); // clic sur bouton
     if (!numTel || !motDePasse) {
-      Alert.alert('Erreur', 'Veuillez remplir tous les champs.');
+      await playSound('error');
+      alert('Veuillez remplir tous les champs.');
       return;
     }
     setLoading(true);
-
     try {
       const response = await fetch(`${SERVER_URL}/api/login-pointage`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tel: numTel, motDePasse }),
       });
-
       const data = await response.json();
-
       if (response.ok) {
-        Alert.alert('Succès', data.message);
-        // NAVIGATION MODIFIÉE : on navigue vers Dashboard et on passe les données de l'employé
+        await playSound('success'); // succès login
+        alert(data.message);
         navigation.navigate('Dashboard', { employee: data.employee });
       } else {
-        Alert.alert('Erreur', data.message);
+        await playSound('error'); // erreur login
+        alert(data.message);
       }
     } catch (error) {
-      Alert.alert('Erreur', 'Impossible de se connecter au serveur.');
+      await playSound('error');
+      alert('Impossible de se connecter au serveur.');
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleInputChange = async (setter, value) => {
+    setter(value);
+    await playSound('click'); // son à chaque saisie
+  };
+
   return (
     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={[styles.card, { backgroundColor: theme.colors.card, shadowColor: theme.colors.shadow, }]}>
+      <View style={[styles.card, { backgroundColor: theme.colors.card, shadowColor: theme.colors.shadow }]}>
         <Text style={[styles.titre, { color: theme.colors.primary }]}>Accès au pointage</Text>
+
         <View style={[styles.inputContainer, { backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border }]}>
           <MaterialIcons name="phone" size={20} color={theme.colors.textSecondary} style={styles.icon} />
           <TextInput
@@ -60,10 +83,11 @@ const LoginScreen = () => {
             placeholder="Numéro de téléphone"
             keyboardType="phone-pad"
             value={numTel}
-            onChangeText={setNumTel}
+            onChangeText={(text) => handleInputChange(setNumTel, text)}
             placeholderTextColor={theme.colors.placeholder}
           />
         </View>
+
         <View style={[styles.passwordContainer, { backgroundColor: theme.colors.inputBackground, borderColor: theme.colors.border }]}>
           <MaterialIcons name="lock" size={20} color={theme.colors.textSecondary} style={styles.icon} />
           <TextInput
@@ -71,12 +95,15 @@ const LoginScreen = () => {
             placeholder="Mot de passe"
             secureTextEntry={!showPassword}
             value={motDePasse}
-            onChangeText={setMotDePasse}
+            onChangeText={(text) => handleInputChange(setMotDePasse, text)}
             placeholderTextColor={theme.colors.placeholder}
           />
           <TouchableOpacity 
             style={styles.eyeIcon} 
-            onPress={() => setShowPassword(!showPassword)}
+            onPress={async () => {
+              setShowPassword(!showPassword);
+              await playSound('click');
+            }}
           >
             <MaterialCommunityIcons 
               name={showPassword ? 'eye-off' : 'eye'} 
@@ -85,16 +112,13 @@ const LoginScreen = () => {
             />
           </TouchableOpacity>
         </View>
+
         <TouchableOpacity 
           style={[styles.button, { backgroundColor: theme.colors.primary }]} 
           onPress={handleLogin}
           disabled={loading}
         >
-          {loading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Se connecter</Text>
-          )}
+          {loading ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.buttonText}>Se connecter</Text>}
         </TouchableOpacity>
       </View>
     </ScrollView>
