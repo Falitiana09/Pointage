@@ -13,7 +13,7 @@ const SERVER_URL = 'https://app-d640882c-5f6c-40be-bdce-71d739b28d12.cleverapps.
 const ListesScreen = () => {
     const navigation = useNavigation();
     const isFocused = useIsFocused();
-    const { theme, soundEnabled } = useTheme(); // 🔊 Récupère le son activé
+    const { theme, soundEnabled } = useTheme();
 
     const [employees, setEmployees] = useState([]);
     const [loading, setLoading] = useState(false);
